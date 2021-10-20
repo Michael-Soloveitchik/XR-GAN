@@ -6,7 +6,7 @@ import random
 from Augmentations.augmentations import Augment_DRR
 from numba import prange
 import imgaug
-import tqdm
+from tqdm import tqdm
 
 remove_and_create = lambda x: (not shutil.rmtree(x, ignore_errors=True)) and os.makedirs(x)
 def create_datasets(data_path,datasets_path,f_name, j, train=True):
@@ -55,24 +55,32 @@ def create_datasets(data_path,datasets_path,f_name, j, train=True):
 if __name__ == '__main__':
     data_path  = r'C:\Users\micha\PycharmProjects\CT_DRR\Data'
     datasets_path  = r'C:\Users\micha\PycharmProjects\CT_DRR\Datasets'
-    remove_and_create(os.path.join(datasets_path))
-    dir_content = lambda x: sorted(os.listdir(os.path.join(data_path, 'DRR', x)))
+    # remove_and_create(os.path.join(datasets_path))
+    dir_content = lambda x,y: sorted(os.listdir(os.path.join(data_path, x,y)))
 
-    input_dir =  dir_content('Input')
-    ulna_dir =   dir_content('Ulna')
-    radius_dir = dir_content('Radius')
+    input_dir =  dir_content('DRR','Input')
+    ulna_dir =   dir_content('DRR','Ulna')
+    radius_dir = dir_content('DRR','Radius')
+    xr_dir     = dir_content('X-Ray','')
+
+    print (len(input_dir),len(ulna_dir),len(radius_dir))
     assert (len(input_dir)==len(ulna_dir)==len(radius_dir))
-    n = len(input_dir)
-    permutated_indexes = np.random.permutation(n)
+    n1 = len(input_dir)
+    n2 = len(xr_dir)
+    permutated_input_indexes = np.random.permutation(n1)
+    permutated_xr_indexes = np.random.permutation(n2)
+
 
     # xr2ulna
+
+    # xr2radius
     remove_and_create(os.path.join(datasets_path, 'xr2ulna'))
     remove_and_create(os.path.join(datasets_path, 'xr2ulna', 'trainA'))
     remove_and_create(os.path.join(datasets_path, 'xr2ulna', 'trainB'))
     remove_and_create(os.path.join(datasets_path, 'xr2ulna', 'testA'))
     remove_and_create(os.path.join(datasets_path, 'xr2ulna', 'testB'))
 
-    # xr2ulna
+    # xr2radius
     remove_and_create(os.path.join(datasets_path, 'xr2radius'))
     remove_and_create(os.path.join(datasets_path, 'xr2radius', 'trainA'))
     remove_and_create(os.path.join(datasets_path, 'xr2radius', 'trainB'))
@@ -90,16 +98,15 @@ if __name__ == '__main__':
 
     # train sets
     for j in prange(12):
-        for i in tqdm(permutated_indexes[:int(n*0.9)]):
+        print('DRR train set, augment ',j,'/12: ')
+        for i in tqdm(permutated_input_indexes[:int(n1*0.9)]):
             f_name = input_dir[i]
             create_datasets(data_path,datasets_path,f_name,j,train=True)
 
         # test sets
-        for i in tqdm(permutated_indexes[int(n*0.9):]):
+        print('DRR test set, augment ',j,'/12: ')
+        for i in tqdm(permutated_input_indexes[int(n1*0.9):]):
             f_name = input_dir[i]
             create_datasets(data_path,datasets_path,f_name,j, train=False)
             # xr2ulna
-
-
-
 

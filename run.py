@@ -1,5 +1,6 @@
 run_Initialization
-run_Preprocess_Datar
-run_Preprocess_RealXR
-run_Datasets
+run_Preprocess_Data
+run_Preprocess_XR
+run_Datasets_DRR
+run_Datasets_XR
 run_Train

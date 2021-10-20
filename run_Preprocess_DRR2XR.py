@@ -8,6 +8,7 @@ if __name__ == '__main__':
     DATA_apth  = ' '.join(sys.argv[1:])
 
     datasets_path = r'C:\Users\micha\PycharmProjects\CT_DRR\Datasets'
+    data_path = r'C:\Users\micha\PycharmProjects\CT_DRR\Data'
     remove_and_create(os.path.join(datasets_path, 'xr_real'))
     for i,f in enumerate(os.listdir(DATA_apth)):
         im = cv2.imread(os.path.join(DATA_apth,f))
@@ -19,4 +20,4 @@ if __name__ == '__main__':
         im_new = im[m_new:m_new+512,n_n_new:n_n_new+512,:]
         print(im_new.shape)
         if (im_new.shape==(512,512,3)):
-            cv2.imwrite(os.path.join(datasets_path, 'xr_real','Input_'+str(i)+'.jpg'),im_new)
+            cv2.imwrite(os.path.join(data_path, 'X-Ray','Input_'+str(i)+'.jpg'),im)
