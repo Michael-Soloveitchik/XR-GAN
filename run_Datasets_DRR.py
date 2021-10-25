@@ -8,7 +8,8 @@ from numba import prange
 import imgaug
 from tqdm import tqdm
 
-remove_and_create = lambda x: (not shutil.rmtree(x, ignore_errors=True)) and os.makedirs(x)
+# remove_and_create = lambda x: (not shutil.rmtree(x, ignore_errors=True)) and os.makedirs(x)
+
 def create_datasets(data_path,datasets_path,f_name, j, train=True):
     seed_n = random.randint(0, 2 ** 32 - 1)
 

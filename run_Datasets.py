@@ -7,6 +7,7 @@ from Augmentations.augmentations import Augment_DRR
 from numba import prange
 import imgaug
 from tqdm import tqdm
+from SubXR_configs_parser import SubXRParser
 
 remove_and_create = lambda x: (not shutil.rmtree(x, ignore_errors=True)) and os.makedirs(x)
 def create_datasets(data_path,datasets_path,f_name, j, train=True):
@@ -50,9 +51,13 @@ def create_datasets(data_path,datasets_path,f_name, j, train=True):
                 os.path.join(datasets_path, 'xr2ulna_n_radius', 'trainB2' if train else 'testB2'))
     Augment_DRR(os.path.join(datasets_path, 'xr2ulna_n_radius', 'trainB2' if train else 'testB2'), f_name,j,seed_n)
     os.remove(os.path.join(datasets_path, 'xr2ulna_n_radius', 'trainB2' if train else 'testB2', f_name))
-
+def create_datasets(configs):
+    for dataset_type in configs['Datasets']:
 
 if __name__ == '__main__':
+    configs = SubXRParser()
+    create_datasets(configs)
+
     data_path  = r'C:\Users\micha\PycharmProjects\CT_DRR\Data'
     datasets_path  = r'C:\Users\micha\PycharmProjects\CT_DRR\Datasets'
     # remove_and_create(os.path.join(datasets_path))
@@ -69,32 +74,6 @@ if __name__ == '__main__':
     n2 = len(xr_dir)
     permutated_input_indexes = np.random.permutation(n1)
     permutated_xr_indexes = np.random.permutation(n2)
-
-
-    # xr2ulna
-
-    # xr2radius
-    remove_and_create(os.path.join(datasets_path, 'xr2ulna'))
-    remove_and_create(os.path.join(datasets_path, 'xr2ulna', 'trainA'))
-    remove_and_create(os.path.join(datasets_path, 'xr2ulna', 'trainB'))
-    remove_and_create(os.path.join(datasets_path, 'xr2ulna', 'testA'))
-    remove_and_create(os.path.join(datasets_path, 'xr2ulna', 'testB'))
-
-    # xr2radius
-    remove_and_create(os.path.join(datasets_path, 'xr2radius'))
-    remove_and_create(os.path.join(datasets_path, 'xr2radius', 'trainA'))
-    remove_and_create(os.path.join(datasets_path, 'xr2radius', 'trainB'))
-    remove_and_create(os.path.join(datasets_path, 'xr2radius', 'testA'))
-    remove_and_create(os.path.join(datasets_path, 'xr2radius', 'testB'))
-
-    # xr2ulna_n_radius
-    remove_and_create(os.path.join(datasets_path, 'xr2ulna_n_radius'))
-    remove_and_create(os.path.join(datasets_path, 'xr2ulna_n_radius', 'trainA'))
-    remove_and_create(os.path.join(datasets_path, 'xr2ulna_n_radius', 'trainB1'))
-    remove_and_create(os.path.join(datasets_path, 'xr2ulna_n_radius', 'trainB2'))
-    remove_and_create(os.path.join(datasets_path, 'xr2ulna_n_radius', 'testA'))
-    remove_and_create(os.path.join(datasets_path, 'xr2ulna_n_radius', 'testB1'))
-    remove_and_create(os.path.join(datasets_path, 'xr2ulna_n_radius', 'testB2'))
 
     # train sets
     for j in prange(12):

@@ -7,13 +7,41 @@
             },
             "DRR" : {
                 "in_dir"  : "",
-                "out_dir" : ".\\Data\\DRR_fractionated"
+                "in_sub_folders": [
+                    "X",
+                    "Y",
+                    "XY",
+                    "YX"
+                ],
+                "out_dir" : ".\\Data\\DRR_fractionated",
+                "out_sub_folders": [
+                    "Input",
+                    "Ulna",
+                    "Radius",
+                    "Ulna_mask",
+                    "Radius_mask",
+                    "Ulna_and_Radius_mask"
+                ]
             }
         },
         "complete"   : {
             "DRR" : {
-                "in_dir"  : "",
-                "out_dir" : ".\\Data\\DRR_complete"
+                "in_dir"  : "C:\\Michael research data\\CT - Data - (3)",
+                "in_sub_folders": [
+                    "X",
+                    "Y",
+                    "XY",
+                    "YX"
+                ],
+                "out_dir" : ".\\Data\\DRR_complete",
+                "out_sub_folders": [
+                    "Input",
+                    "Ulna",
+                    "Radius",
+                    "Ulna_mask",
+                    "Radius_mask",
+                    "Ulna_and_Radius_mask"
+                ]
             },
             "XR"  : {
                 "in_dir"  : "C:\\Michael research data\\X-Ray - Data - (2)",
@@ -22,8 +50,72 @@
         }
     },
     "Datasets" : {
-        "DRR_c2XR_c"    :    "",
-        "XR_c2Ulna_c"   :    "",
-        "XR_c2Radius_c" : ""
+        "SR_XR_c"    :    {
+            "dir"         : ".\\Datasets\\sr_xr_complete",
+            "sub_folders" : [
+                "trainA",
+                "trainB",
+                "testA",
+                "testB"
+            ]
+        },
+        "DRR_c2XR_c"    :    {
+            "dir"         : ".\\Datasets\\drr_complete2xr_complete",
+            "sub_folders" : [
+                "trainA",
+                "trainB",
+                "testA",
+                "testB"
+            ],
+            "GAN": {
+                "exists": false,
+                "hub" : "tensorflow",
+                "path": ""
+            }
+        },
+        "XR_c2Ulna_c"    :    {
+            "dir" : ".\\Datasets\\xr_complete2ulna_complete",
+            "sub_folders" : [
+                "trainA",
+                "trainB",
+                "testA",
+                "testB"
+            ],
+            "GAN": {
+                "exists": false,
+                "hub" : "tensorflow",
+                "path": ""
+            }
+        },
+        "XR_c2Radius_c" :       {
+            "dir" : ".\\Datasets\\xr_complete2radius_complete",
+            "sub_folders" : [
+                "trainA",
+                "trainB",
+                "testA",
+                "testB"
+            ],
+            "GAN": {
+                "exists": false,
+                "hub" : "tensorflow",
+                "path": ""
+            }
+        },
+        "XR_c2Radius_and_Ulna_c" :      {
+            "dir" : ".\\Datasets\\xr_complete2radius_and_ulna_complete",
+            "sub_folders" : [
+                "trainA",
+                "trainB1",
+                "trainB2",
+                "testA",
+                "testB1",
+                "testB2"
+            ],
+            "GAN": {
+                "exists": false,
+                "hub" : "tensorflow",
+                "path": ""
+            }
+        }
     }
 }
