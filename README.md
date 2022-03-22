@@ -1,1 +1,2 @@
 "# XR-GAN" 
+# SubXR-GAN

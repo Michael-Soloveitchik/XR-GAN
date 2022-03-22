@@ -5,7 +5,15 @@
       <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Models/Pix2Pix_single" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.7 (SubXR)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.9 (SubXR-GAN)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+  <component name="PackageRequirementsSettings">
+    <option name="requirementsPath" value="" />
+  </component>
+  <component name="PyDocumentationSettings">
+    <option name="format" value="GOOGLE" />
+    <option name="myDocStringFormat" value="Google" />
+    <option name="renderExternalDocumentation" value="true" />
   </component>
 </module>

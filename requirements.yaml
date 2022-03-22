@@ -1,0 +1,33 @@
+name: deep_learning
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.7
+  - pip
+  - numpy
+  - pillow
+  - yaml
+  - pyyaml
+  - matplotlib
+  - tensorboardx
+  - tensorboard
+  - protobuf
+  - numba
+  - tqdm
+  - seaborn
+  - geopandas
+  - sqlalchemy
+  - fiona
+  - psycopg2
+  - xlsxwriter
+  - geoalchemy2
+  - boto3 == 1.*
+  - mergedeep~=1.3.4
+  - botocore~=1.23.15
+  - s3fs
+  - pytorch==1.9.0
+  - torchvision==0.10.0
+  - pip:
+    - fiftyone
+    - clearml==1.1.3rc0

@@ -1,0 +1,259 @@
+{
+    "Data"     : {
+        "fractionated": {
+            "XR"  : {
+                "in_dir"  : "",
+                "in_sub_folders": [],
+                "out_dir" : "./Data/XR_complete",
+                "out_sub_folders": []            },
+            "DRR" : {
+                "in_dir"  : "",
+                "in_sub_folders": [
+                    "X",
+                    "Y",
+                    "xXY",
+                    "xYY",
+                    "yYX",
+                    "yXX"
+                ],
+                "out_dir" : "./Data/DRR_fractionated",
+                "out_sub_folders": [
+                    "Input",
+                    "Ulna",
+                    "Radius",
+                    "Ulna_Mask",
+                    "Radius_Mask",
+                    "Ulna_and_Radius_Mask",
+                    "Phalanges_Mask"
+                ]
+            }
+        },
+        "complete"   : {
+            "DRR" : {
+                "in_dir"  : "/home/michael/MichaelGoogleDrive/CT-DRR/Data/final CT - Data",
+                "in_sub_folders": [
+                    "X",
+                    "Y",
+                    "xXY",
+                    "yXY",
+                    "xYX",
+                    "yYX"
+                ],
+                "out_dir" : "./Data/DRR_complete",
+                "out_sub_folders": [
+                    "Input",
+                    "Ulna",
+                    "Radius",
+                    "Ulna_Mask",
+                    "Radius_Mask",
+                    "Ulna_and_Radius_Mask",
+                    "Phalanges_Mask"
+                ],
+                "transform": [
+                                {
+                                    "crop": [1024,512]
+                                },
+                                {
+                                    "translate": [100,0]
+                                }
+                             ]
+            },
+            "XR"  : {
+                "in_dir"  : "/home/michael/MichaelGoogleDrive/CT-DRR/Data/final X-Ray - Data",
+                "in_sub_folders": [],
+                "out_dir" : "./Data/XR_complete",
+                "out_sub_folders": [],
+                "transform": [
+                                {
+                                    "self_crop": []
+                                }
+                             ]
+            }
+        }
+    },
+    "Datasets" : {
+        "SR_XR_complete" :    {
+            "in_dir_A"          : "./Data/XR_complete",
+            "in_dir_B"          : "./Data/XR_complete",
+            "out_dir"           : "./Datasets/sr_xr_complete",
+            "out_sub_folders" : [
+                "trainA",
+                "trainB",
+                "testA",
+                "testB"
+            ],
+            "transform_A":  [
+                                {
+                                    "down_sample": [384,384]
+                                }
+                            ],
+            "transform_B": [
+                                {
+                                    "up_sample": [1024,1024]
+                                }
+                            ],
+            "augmentation_A": "sr_xr_complete_AU",
+            "augmentation_B": "sr_xr_complete_AU"
+        },
+        "XR_complete_2_XR_complete" :    {
+            "in_dir_A"          : "./Data/XR_complete",
+            "in_dir_B"          : "./Data/XR_complete",
+            "out_dir"         : "./Datasets/xr_complete_2_xr_compplete",
+            "out_sub_folders" : [
+                "trainA",
+                "trainB",
+                "testA",
+                "testB"
+            ],
+            "transform_A": [
+                                {
+                                    "SR_GAN": ["./Models/sr_gan/results/exp000/p-best.pth", 400,800, 650]
+                                },
+                              {
+                                  "crop": [1024]
+                              }
+                             ],
+            "transform_B": [
+                                {
+                                    "SR_GAN": ["./Models/sr_gan/results/exp000/p-best.pth", 400, 800, 650]
+                                },
+                                {
+                                    "crop": [1024]
+                                }
+                             ],
+            "augmentation_A": "xr_complete_2_xr_compplete_AU",
+            "augmentation_B": "xr_complete_2_xr_compplete_AU"
+        },
+        "XR_complete_2_Ulna_mask" :    {
+            "in_dir_A"          : "./Data/DRR_complete/Input",
+            "in_dir_B"          : "./Data/DRR_complete/Ulna_mask",
+            "out_dir"         : "./Datasets/xr_complete_2_ulna_mask",
+            "out_sub_folders" : [
+                "trainA",
+                "trainB",
+                "testA",
+                "testB"
+            ],
+            "transform_A": [
+                                {
+                                    "DRR_2_XR": ["./Models/cycle_gan/SAMPLEs/drr_complete_2_xr_complete_unet128_025", 9000, "Ulna_and_Radius"]
+                                }
+                            ],
+            "transform_B": [
+                                {
+                                    "binarization": []
+                                }
+                            ],
+            "augmentation_A": "full_xr_AU",
+            "augmentation_B": "full_xr_AU"
+        },
+        "XR_complete_2_Radius_mask" :    {
+            "in_dir_A"          : "",
+            "in_dir_B"          : "./Data/DRR_complete/Radius_mask",
+            "out_dir"         : "./Datasets/xr_complete_2_radius_mask",
+            "out_sub_folders" : [
+                "trainA",
+                "trainB",
+                "testA",
+                "testB"
+            ],
+            "transform_A": [
+                                {
+                                    "DRR_2_XR": ["./Models/cycle_gan/SAMPLEs/drr_complete_2_xr_complete_unet128_025", 9000, "Ulna_and_Radius"]
+                                }
+                            ],
+            "transform_B": [
+                                {
+                                    "binarization": []
+                                }
+                            ],
+            "augmentation_A": "full_xr_AU",
+            "augmentation_B": "full_xr_AU"
+        },
+        "DRR_complete_2_XR_complete"    :    {
+            "in_dir_A"         : "./Data/DRR_complete/Input",
+            "in_dir_B"         : "./Data/XR_complete",
+            "out_dir"         : "./Datasets/drr_complete_2_xr_complete",
+            "out_sub_folders" : [
+                "trainA",
+                "trainB",
+                "testA",
+                "testB"
+            ],
+            "transform_A": [],
+            "transform_B": [],
+            "augmentation_A": "drr_complete_2_xr_complete_AU",
+            "augmentation_B": "drr_complete_2_xr_complete_AU"
+        },
+        "XR_complete_2_Ulna_complete"    :    {
+            "in_dir_A"          : "./Data/DRR_complete/Input",
+            "in_dir_B"          : "./Data/DRR_complete/Ulna",
+            "out_dir"         : "./Datasets/xr_complete_2_ulna_complete",
+            "out_sub_folders" : [
+                "trainA",
+                "trainB",
+                "testA",
+                "testB"
+            ],
+            "transform_A": [
+                                {
+                                    "DRR_2_XR": ["./Models/cycle_gan/SAMPLEs/batch_30_pyramids_0_30_identity_6_5_unet_16_resnet_1blocks_resnet_1blocks_gamma_15_lp_gamma_0_hp_gamma_15_lambda_A_60", 6000, "Ulna_and_Radius"]
+                                }
+                            ],
+            "transform_B": [
+                                {
+                                    "DRR_2_XR": ["./Models/cycle_gan/SAMPLEs/batch_30_pyramids_0_30_identity_6_5_unet_16_resnet_1blocks_resnet_1blocks_gamma_15_lp_gamma_0_hp_gamma_15_lambda_A_60", 6000, "Ulna"]
+                                }
+                           ],
+            "augmentation_A": "full_xr_AU",
+            "augmentation_B": "full_xr_AU"
+        },
+        "XR_complete_2_Radius_complete" :       {
+            "in_dir" : "./Data/DRR_complete",
+            "out_dir" : "./Datasets/xr_complete_2_radius_complete",
+            "out_sub_folders" : [
+                "trainA",
+                "trainB",
+                "testA",
+                "testB"
+            ],
+            "transform_A": [
+                                {
+                                    "DRR_2_XR": ["./Models/cycle_gan/SAMPLEs/drr_complete_2_xr_complete_unet128_050_lambda_b_100", 9000, "Ulna_and_Radius"]
+                                }
+                            ],
+            "transform_B": [
+                                {
+                                    "DRR_2_XR": ["./Models/cycle_gan/SAMPLEs/drr_complete_2_xr_complete_unet128_050_lambda_b_100", 9000, "Ulna_and_Radius"]
+                                }
+                           ],
+            "augmentation_A": "full_xr_AU",
+            "augmentation_B": "full_xr_AU"
+        },
+        "XR_complete_2_Radius_and_Ulna_complete" :      {
+            "in_dir" : "./Data/DRR_complete",
+            "out_dir" : "./Datasets/xr_complete2radius_and_ulna_complete",
+            "out_sub_folders" : [
+                "trainA",
+                "trainB1",
+                "trainB2",
+                "testA",
+                "testB1",
+                "testB2"
+            ],
+             "transform_A": [
+                                 {
+                                    "DRR_2_XR": ["./Models/cycle_gan/SAMPLEs/drr_complete_2_xr_complete_unet128_050_lambda_b_100", 9000, "Ulna_and_Radius"]
+                                 }
+                             ],
+             "transform_B": [
+                                 {
+                                    "DRR_2_XR": ["./Models/cycle_gan/SAMPLEs/drr_complete_2_xr_complete_unet128_050_lambda_b_100", 9000, "Ulna_and_Radius"]
+                                 }
+                            ],
+             "augmentation_A": "full_xr_AU",
+             "augmentation_B": "full_xr_AU"
+
+        }
+    }
+}

@@ -1,0 +1,154 @@
+{
+    "Data"     : {
+        "complete"   : {
+            "DRR" : {
+                "in_dir"  : "/home/michael/MichaelGoogleDrive/CT-DRR/Data/final CT - Data",
+                "in_sub_folders": [
+                    "X",
+                    "Y",
+                    "xXY",
+                    "yXY",
+                    "xYX",
+                    "yYX"
+                ],
+                "out_dir" : "./Data/DRR_complete",
+                "out_sub_folders": [
+                    "Input",
+                    "Ulna",
+                    "Radius",
+                    "Ulna_Mask",
+                    "Radius_Mask",
+                    "Ulna_and_Radius_Mask",
+                    "Phalanges_Mask"
+                ],
+                "transform": [
+                                {
+                                    "crop": [1024,512]
+                                },
+                                {
+                                    "translate": [100,0]
+                                }
+                             ]
+            },
+            "XR"  : {
+                "in_dir"  : "/home/michael/MichaelGoogleDrive/CT-DRR/Data/final X-Ray - Data",
+                "in_sub_folders": [],
+                "out_dir" : "./Data/XR_complete",
+                "out_sub_folders": [],
+                "transform": [
+                                {
+                                    "self_crop": []
+                                }
+                             ]
+            }
+        }
+    },
+    "Datasets" : {
+        "XR_complete_2_Ulna_and_Radius_Mask_complete" :   {
+            "model": "cycle_gan",
+            "in_dir_train_A" : "./Data/XR_complete/Input",
+            "in_dir_train_B" : "./Data/XR_complete/Ulna_and_Radius_Mask",
+            "in_dir_test_A" : "./Data/XR_complete/XR",
+            "in_dir_test_B" : "./Data/XR_complete/XR",
+            "out_dir" : "./Datasets/xr_complete2ulna_and_radius_mask_complete",
+            "out_sub_folders" : [
+                "A",
+                "B"
+            ],
+             "transform_A": [
+                             ],
+             "transform_B": [
+                                {
+                                    "image_2_mask": [0.2,1.0]
+                                }
+                            ],
+             "repeat_times_train" : 10,
+             "repeat_times_test" : 1,
+             "is_paired": true,
+             "augmentation_train_A": "XR_2_mask_AU",
+             "augmentation_train_B": "XR_2_mask_AU",
+             "augmentation_test_A": "no_crop_XR_AU",
+             "augmentation_test_B": "no_crop_XR_AU"
+        },
+        "DRR_complete_2_XR_complete" :   {
+            "model": "cycle_gan",
+            "in_dir_train_A" : "./Data/DRR_complete/Input",
+            "in_dir_train_B" : "./Data/XR_complete/XR",
+            "in_dir_test_A" : "./Data/DRR_complete/Input",
+            "in_dir_test_B" : "./Data/XR_complete/XR",
+            "out_dir" : "./Datasets/xr_complete2ulna_and_radius_mask_complete",
+            "out_sub_folders" : [
+                "A",
+                "B"
+            ],
+             "transform_A": [
+                             ],
+             "transform_B": [
+                                {
+                                    "intersect_with_mask": [
+                                                            "cycle_gan_classic",
+                                                            "/home/michael/PycharmProjects/XR-GAN/SAMPLEs/XR_2_Ulana_and_Radius_Mask",
+                                                             10000
+                                                           ]
+                                }
+                            ],
+             "repeat_times_train" : 10,
+             "repeat_times_test" : 5,
+             "is_paired": false,
+             "augmentation_train_A": "drr_complete_2_xr_complete_AU",
+             "augmentation_train_B": "drr_complete_2_xr_complete_AU",
+             "augmentation_test_A": "drr_complete_2_xr_complete_AU",
+             "augmentation_test_B": "drr_complete_2_xr_complete_AU",
+             "train_pass_condition": null
+        }
+    },
+    "Models": {
+        "DRR_2_Ulana_and_Radius_Mask": {
+            "parametrs": {
+                "python": "/home/michael/PycharmProjects/XR-GAN/Models/cycle_gan_classic/train.py",
+                "batch_size": 10,
+                "serial_batches": null,
+                "dataset_mode": "unaligned",
+                "dataroot" : "/home/michael/PycharmProjects/XR-GAN/Datasets/drr_complete2ulna_and_radius_mask_complete",
+                "name": "DRR_2_Ulana_and_Radius_Mask",
+                "model": "pix2pix",
+                "netG": "unet_128",
+                "preprocess": "None",
+                "no_flip": null,
+                "gan_mode": "lsgan",
+                "num_threads": 0,
+                "save_by_iter": null,
+                "save_epoch_freq": 2000,
+                "save_latest_freq": 200,
+                "print_freq": 200,
+                "update_html_freq": 200,
+                "display_freq": 200
+            }
+        },
+        "XR_2_Ulana_and_Radius_Mask": {
+            "parametrs": {
+                "python": "/home/michael/PycharmProjects/XR-GAN/Models/cycle_gan_classic/train.py",
+                "batch_size": 10,
+                "serial_batches": null,
+                "dataset_mode": "unaligned",
+                "dataroot" : "/home/michael/PycharmProjects/XR-GAN/Datasets/xr_complete2ulna_and_radius_mask_complete",
+                "name": "DRR_2_Ulana_and_Radius_Mask",
+                "model": "pix2pix",
+                "netG": "unet_128",
+                "preprocess": "None",
+                "no_flip": null,
+                "lambda_L1": 250,
+                "gan_mode": "lsgan",
+                "num_threads": 0,
+                "save_by_iter": null,
+                "save_epoch_freq": 2000,
+                "save_latest_freq": 250,
+                "epoch_count": 0,
+                "print_freq": 250,
+                "update_html_freq": 250,
+                "display_freq": 250,
+                "continue_train": null
+            }
+        }
+    }
+}
