@@ -1,3 +1,7 @@
 /Datasets/
 /Data/
 /Models/Pix2Pix_single/runs/
+/Models/cycle_gan_classic/SAMPLEs/
+/Models/perceptual_cycle_gan/SAMPLEs/
+/Models/sr_gan/samples/
+/Models/sr_gan/
