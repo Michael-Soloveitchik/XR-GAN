@@ -3,9 +3,9 @@ import shutil
 import numpy as np
 # mkdirs = lambda x: os.path.exists(x) or os.makedirs()
 # rmdirs = lambda x: (not os.path.exists(x)) or shutil.rmtree(x)
-remove_and_create = lambda x: (shutil.rmtree(os.path.abspath(x), ignore_errors=True)) and os.makedirs(x)
 create_if_not_exists = lambda x: os.path.exists(x) or os.makedirs(x)
-dirs_content = lambda paths, random: zip(*[np.random.permutation(os.listdir(path)) if random else sorted(os.listdir(path)) for path in paths if os.path.exists(os.path.abspath(path))])
+remove_and_create = lambda x: (shutil.rmtree(os.path.abspath(x), ignore_errors=True)) or create_if_not_exists(x)
+dirs_content = lambda paths, random: zip(*[list(np.random.permutation(os.listdir(path))) if random else sorted(os.listdir(path)) for path in paths if os.path.exists(os.path.abspath(path))])
 # def dirs_content(paths, random):
 #     res = []
 #     for path in paths:

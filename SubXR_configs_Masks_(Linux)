@@ -2,38 +2,26 @@
     "Data"     : {
         "complete"   : {
             "DRR" : {
-                "in_dir"  : "/home/michael/MichaelGoogleDrive/CT-DRR/Data/final CT - Data",
+                "in_dir"  : "/home/michael/Documents",
                 "in_sub_folders": [
-                    "X",
-                    "Y",
-                    "xXY",
-                    "yXY",
-                    "xYX",
-                    "yYX"
+                    "Data"
                 ],
                 "out_dir" : "./Data/DRR_complete",
                 "out_sub_folders": [
-                    "Input",
-                    "Ulna",
-                    "Radius",
-                    "Ulna_Mask",
-                    "Radius_Mask",
-                    "Ulna_and_Radius_Mask",
-                    "Phalanges_Mask"
+                    "Hand",
+                    "Forehand_Mask",
+                    "Carpals_Mask",
+                    "Metacarpals_Mask",
+                    "ProximalPhalanges_Mask",
+                    "IntermediatePhalanges_Mask",
+                    "DistalPhalanges_Mask"
                 ],
-                "transform": [
-                                {
-                                    "crop": [1024,512]
-                                },
-                                {
-                                    "translate": [100,0]
-                                }
-                             ]
+                "transform": []
             },
             "XR"  : {
                 "in_dir"  : "/home/michael/MichaelGoogleDrive/CT-DRR/Data/final X-Ray - Data",
                 "in_sub_folders": [],
-                "out_dir" : "./Data/XR_complete",
+                "out_dir" : "./Data/XR_complete/Hand/",
                 "out_sub_folders": [],
                 "transform": [
                                 {
@@ -44,13 +32,20 @@
         }
     },
     "Datasets" : {
-        "XR_complete_2_Ulna_and_Radius_Mask_complete" :   {
+        "XR_complete_2_Mask_complete" :   {
             "model": "cycle_gan",
-            "in_dir_train_A" : "./Data/XR_complete/Input",
-            "in_dir_train_B" : "./Data/XR_complete/Ulna_and_Radius_Mask",
-            "in_dir_test_A" : "./Data/XR_complete/XR",
-            "in_dir_test_B" : "./Data/XR_complete/XR",
-            "out_dir" : "./Datasets/xr_complete2ulna_and_radius_mask_complete",
+            "in_dir_train_A" : ["./Data/DRR_complete/Hand"],
+            "in_dir_train_B" : [
+                                "./Data/DRR_complete/Forehand_Mask",
+                                "./Data/DRR_complete/Carpals_Mask",
+                                "./Data/DRR_complete/Metacarpals_Mask",
+                                "./Data/DRR_complete/ProximalPhalanges_Mask",
+                                "./Data/DRR_complete/IntermediatePhalanges_Mask",
+                                "./Data/DRR_complete/DistalPhalanges_Mask"
+                                ],
+            "in_dir_test_A" : ["./Data/XR_complete/Hand"],
+            "in_dir_test_B" : ["./Data/XR_complete/Hand"],
+            "out_dir" : "./Datasets/xr_complete_2_mask_complete",
             "out_sub_folders" : [
                 "A",
                 "B"
@@ -62,7 +57,7 @@
                                     "image_2_mask": [0.2,1.0]
                                 }
                             ],
-             "repeat_times_train" : 10,
+             "repeat_times_train" : 70,
              "repeat_times_test" : 1,
              "is_paired": true,
              "augmentation_train_A": "XR_2_mask_AU",
@@ -103,18 +98,19 @@
         }
     },
     "Models": {
-        "DRR_2_Ulana_and_Radius_Mask": {
+        "DRR_2_Mask": {
             "parametrs": {
                 "python": "/home/michael/PycharmProjects/XR-GAN/Models/cycle_gan_classic/train.py",
                 "batch_size": 10,
                 "serial_batches": null,
                 "dataset_mode": "unaligned",
-                "dataroot" : "/home/michael/PycharmProjects/XR-GAN/Datasets/drr_complete2ulna_and_radius_mask_complete",
+                "dataroot" : "/home/michael/PycharmProjects/XR-GAN/Datasets/drr_complete_2_mask_complete",
                 "name": "DRR_2_Ulana_and_Radius_Mask",
                 "model": "pix2pix",
                 "netG": "unet_128",
                 "preprocess": "None",
                 "no_flip": null,
+                "classes": "Forehand_Carpals_Metacarpals_ProximalPhalanges_IntermediatePhalanges_DistalPhalanges",
                 "gan_mode": "lsgan",
                 "num_threads": 0,
                 "save_by_iter": null,

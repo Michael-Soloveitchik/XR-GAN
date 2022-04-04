@@ -30,7 +30,7 @@ class UnalignedDataset(BaseDataset):
 
         self.A_paths = sorted(make_dataset(self.dir_A, opt.max_dataset_size))   # load images from '/path/to/data/trainA'
         self.test_A_paths = sorted(make_dataset(self.dir_A_test, opt.max_dataset_size))   # load images from '/path/to/data/trainA'
-        self.B_paths = sorted(make_dataset(self.dir_B, opt.max_dataset_size))    # load images from '/path/to/data/trainB'
+        self.B_paths = {clss: sorted(make_dataset(os.apth.join(self.dir_B,clss), opt.max_dataset_size)) for clss in opt.classes}    # load images from '/path/to/data/trainB'
         self.A_size = len(self.A_paths)  # get the size of dataset A
         self.test_A_size = len(self.test_A_paths)  # get the size of dataset A
         self.B_size = len(self.B_paths)  # get the size of dataset B
@@ -42,7 +42,7 @@ class UnalignedDataset(BaseDataset):
         get_clossest_power_size = lambda t: int('1'+''.join(['0']*len(bin(t)[2:])),2) if '1' in bin(t)[3:] else t
         get_pad = lambda t : ((get_clossest_power_size(t)-t)//2, ((get_clossest_power_size(t)-t)-(get_clossest_power_size(t)-t)//2))
         self.transform_test_A = lambda x: np.transpose(np.pad((np.array(x.getdata())/(127.5)).astype(np.float32).reshape(x.size[1], x.size[0],3), (get_pad(x.size[1]), get_pad(x.size[0]), (0,0)), 'constant'), [2,0,1])-1. #get_transform(self.opt, grayscale=(input_nc == 1))
-
+        self.opt = opt
     def __getitem__(self, index):
         """Return a data point and its metadata information.
 
@@ -57,21 +57,22 @@ class UnalignedDataset(BaseDataset):
         """
         A_path = self.A_paths[index % self.A_size]  # make sure index is within then range
         test_A_paths = self.test_A_paths[index % self.test_A_size]  # make sure index is within then range
-        keep_picking_B = True
-
         if self.opt.serial_batches:   # make sure index is within then range
             index_B = index % self.B_size
         else:   # randomize the index for domain B to avoid fixed pairs.
             index_B = random.randint(0, self.B_size - 1)
-        B_path = self.B_paths[index_B]
-        B_img = Image.open(B_path).convert('RGB')
-        B = self.transform_B(B_img)
+        B = {}
+        B_path = {}
+        for clss in self.opt.classes.split('_'):
+            B_path[clss] = self.B_paths[clss][index_B]
+            B_img = Image.open(B_path[clss]).convert('RGB')
+            B[clss] = self.transform_B(B_img)[:1]
         A_img = Image.open(A_path).convert('RGB')
         test_A_img = Image.open(test_A_paths).convert('RGB')
         # apply image transformation
         A = self.transform_A(A_img)
         test_A = self.transform_test_A(test_A_img)
-        return {'A': A, 'B': B, 'test_A':test_A, 'A_paths': A_path, 'B_paths': B_path, 'test_A_paths':test_A_paths}
+        return {'A': A[:1], 'test_A':test_A[:1], 'A_paths': A_path, 'test_A_paths':test_A_paths}.update({'B_paths'+k:v for k,v in B_path.items()}).update({'B_'+k:v for k,v in B.items()}).update({'B':torch.cat([B[clss][None,...] for  clss in self.opt.classes])})
     def collate(self, batch):
         elem = batch[0]
         a={k:(torch.stack([d[k]for d in batch]) if type(batch[0][k]) != str else np.stack([np.array(d[k])[None,...] for d in batch])) for k in elem if 'test' not in k}

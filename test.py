@@ -1,3 +1,5 @@
+import os
+
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
@@ -49,10 +51,87 @@ if 0 and __name__ == '__main__':
     plt.show()
     print('Shalom')
 
-if 1 and __name__ == '__main__':
+if 0 and __name__ == '__main__':
     p = r'/home/michael/PycharmProjects/XR-GAN/SAMPLEs/DRR_2_Ulana_and_Radius_Mask/web/images/epoch8800_fake_test_B.png'
     img = cv2.imread(p)
     img=cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     plt.imshow(img)
     plt.show()
     print('shalom')
+
+if 0 and __name__ == '__main__':
+    p = r'/home/michael/Documents/final - CT/pre_DRR/Data'
+    for f in os.listdir(p):
+        if 'Mask' in f:
+            a = f.split('Mask')
+            a[0]=a[0].replace(' ','')
+            n_f = 'Mask'.join(a)
+            print(f,n_f)
+            os.rename(os.path.join(p,f), os.path.join(p,n_f))
+,
+    "Datasets" : {
+        "XR_complete_2_Mask_complete" :   {
+            "model": "cycle_gan",
+            "in_dir_train_A" : "./Data/DRR_complete/Hande",
+            "in_dir_train_B" : [
+                                "./Data/DRR_complete/Forehand_Mask",
+                                "./Data/DRR_complete/Carpals_Mask",
+                                "./Data/DRR_complete/Metacarpals_Mask",
+                                "./Data/DRR_complete/ProximalPhalanges_Mask",
+                                "./Data/DRR_complete/IntermediatePhalanges_Mask",
+                                "./Data/DRR_complete/DistalPhalanges_Mask"
+                                ]
+            "in_dir_test_A" : "./Data/XR_complete/Hand",
+            "in_dir_test_B" : "./Data/XR_complete/Hand",
+            "out_dir" : "./Datasets/xr_complete2ulna_and_radius_mask_complete",
+            "out_sub_folders" : [
+                "A",
+                "B"
+            ],
+             "transform_A": [
+                             ],
+             "transform_B": [
+                                {
+                                    "image_2_mask": [0.2,1.0]
+                                }
+                            ],
+             "repeat_times_train" : 70,
+             "repeat_times_test" : 1,
+             "is_paired": true,
+             "augmentation_train_A": "XR_2_mask_AU",
+             "augmentation_train_B": "XR_2_mask_AU",
+             "augmentation_test_A": "no_crop_XR_AU",
+             "augmentation_test_B": "no_crop_XR_AU"
+        },
+        "DRR_complete_2_XR_complete" :   {
+            "model": "cycle_gan",
+            "in_dir_train_A" : "./Data/DRR_complete/Input",
+            "in_dir_train_B" : "./Data/XR_complete/XR",
+            "in_dir_test_A" : "./Data/DRR_complete/Input",
+            "in_dir_test_B" : "./Data/XR_complete/XR",
+            "out_dir" : "./Datasets/xr_complete2ulna_and_radius_mask_complete",
+            "out_sub_folders" : [
+                "A",
+                "B"
+            ],
+             "transform_A": [
+                             ],
+             "transform_B": [
+                                {
+                                    "intersect_with_mask": [
+                                                            "cycle_gan_classic",
+                                                            "/home/michael/PycharmProjects/XR-GAN/SAMPLEs/XR_2_Ulana_and_Radius_Mask",
+                                                             10000
+                                                           ]
+                                }
+                            ],
+             "repeat_times_train" : 10,
+             "repeat_times_test" : 5,
+             "is_paired": false,
+             "augmentation_train_A": "drr_complete_2_xr_complete_AU",
+             "augmentation_train_B": "drr_complete_2_xr_complete_AU",
+             "augmentation_test_A": "drr_complete_2_xr_complete_AU",
+             "augmentation_test_B": "drr_complete_2_xr_complete_AU",
+             "train_pass_condition": null
+        }
+    },

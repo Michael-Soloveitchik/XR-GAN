@@ -11,11 +11,11 @@ def initialze(configs):
             if configs["Data"][data_type][data_source]['in_dir']:
                 print('remove and create: ',configs["Data"][data_type][data_source]['out_dir'])
                 remove_and_create(configs["Data"][data_type][data_source]['out_dir'])
-                for patient_dir in dir_content(configs["Data"][data_type][data_source]['in_dir'], random=False):
-                    if not os.path.isdir(os.path.join(configs["Data"][data_type][data_source]['in_dir'], patient_dir)):
+                for patient_dir in dirs_content([configs["Data"][data_type][data_source]['in_dir']], random=False):
+                    if not os.path.isdir(os.path.join(configs["Data"][data_type][data_source]['in_dir'], patient_dir[0])):
                         continue
                     for dir in configs["Data"][data_type][data_source]['in_sub_folders']:
-                        create_if_not_exists(os.path.join(configs["Data"][data_type][data_source]['in_dir'],patient_dir, 'pre_DRR',dir))
+                        create_if_not_exists(os.path.join(configs["Data"][data_type][data_source]['in_dir'],patient_dir[0], 'pre_DRR',dir))
                     create_if_not_exists(configs["Data"][data_type][data_source]['out_dir'])
                     for dir in configs["Data"][data_type][data_source]['out_sub_folders']:
                         create_if_not_exists(os.path.join(configs["Data"][data_type][data_source]['out_dir'],dir))
