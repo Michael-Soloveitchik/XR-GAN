@@ -28,9 +28,9 @@ class UnalignedDataset(BaseDataset):
         self.dir_A_test = os.path.join(opt.dataroot,'test', 'A')  # create a path '/path/to/data/trainA'
         self.dir_B = os.path.join(opt.dataroot,'train', 'B')  # create a path '/path/to/data/trainB'
 
-        self.A_paths = sorted(make_dataset(self.dir_A, opt.max_dataset_size))   # load images from '/path/to/data/trainA'
+        self.A_paths = sorted(make_dataset(self.dir_A, opt.input_classes, opt.max_dataset_size))   # load images from '/path/to/data/trainA'
         self.test_A_paths = sorted(make_dataset(self.dir_A_test, opt.max_dataset_size))   # load images from '/path/to/data/trainA'
-        self.B_paths = {clss: sorted(make_dataset(os.apth.join(self.dir_B,clss), opt.max_dataset_size)) for clss in opt.classes}    # load images from '/path/to/data/trainB'
+        self.B_paths = {clss: sorted(make_dataset(os.apth.join(self.dir_B,clss), opt.max_dataset_size)) for clss in opt.output_classes.split('_')}    # load images from '/path/to/data/trainB'
         self.A_size = len(self.A_paths)  # get the size of dataset A
         self.test_A_size = len(self.test_A_paths)  # get the size of dataset A
         self.B_size = len(self.B_paths)  # get the size of dataset B
@@ -63,7 +63,7 @@ class UnalignedDataset(BaseDataset):
             index_B = random.randint(0, self.B_size - 1)
         B = {}
         B_path = {}
-        for clss in self.opt.classes.split('_'):
+        for clss in self.opt.output_classes.split('_'):
             B_path[clss] = self.B_paths[clss][index_B]
             B_img = Image.open(B_path[clss]).convert('RGB')
             B[clss] = self.transform_B(B_img)[:1]
@@ -72,7 +72,7 @@ class UnalignedDataset(BaseDataset):
         # apply image transformation
         A = self.transform_A(A_img)
         test_A = self.transform_test_A(test_A_img)
-        return {'A': A[:1], 'test_A':test_A[:1], 'A_paths': A_path, 'test_A_paths':test_A_paths}.update({'B_paths'+k:v for k,v in B_path.items()}).update({'B_'+k:v for k,v in B.items()}).update({'B':torch.cat([B[clss][None,...] for  clss in self.opt.classes])})
+        return {'A': A[:1], 'test_A':test_A[:1], 'A_paths': A_path, 'test_A_paths':test_A_paths}.update({'B_paths'+k:v for k,v in B_path.items()}).update({'B_'+k:v for k,v in B.items()}).update({'B':torch.cat([B[clss][None,...] for  clss in self.opt.output_classes.split('_')])})
     def collate(self, batch):
         elem = batch[0]
         a={k:(torch.stack([d[k]for d in batch]) if type(batch[0][k]) != str else np.stack([np.array(d[k])[None,...] for d in batch])) for k in elem if 'test' not in k}
