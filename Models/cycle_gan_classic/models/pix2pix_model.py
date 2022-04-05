@@ -43,6 +43,7 @@ class Pix2PixModel(BaseModel):
             opt (Option class)-- stores all the experiment flags; needs to be a subclass of BaseOptions
         """
         BaseModel.__init__(self, opt)
+        self.opt
         # specify the training losses you want to print out. The training/test scripts will call <BaseModel.get_current_losses>
         self.loss_names = ['G_GAN', 'G_L1', 'D_real', 'D_fake']
         self.classes = opt.output_classes.split('_')
@@ -86,10 +87,10 @@ class Pix2PixModel(BaseModel):
         """
         AtoB = self.opt.direction == 'AtoB'
         self.real_A = input['A' if AtoB else 'B'].to(self.device)
-        self.real_test_A = input['test_A'].to(self.device).detach()[:2]
+        self.real_test_A = input['test_A'].to(self.device).detach()
         self.real_B = input['B' if AtoB else 'A'].to(self.device)
         for clss in self.classes:
-            self.__dict__['real_B_' + clss] = input['B_'+clss if AtoB else 'A_'+clss].to(self.device)
+            self.__dict__['real_B_' + clss] = input['B_'+clss if AtoB else 'A_'+clss].to(self.device)[:self.opt.input_nc]
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
     def forward(self, train=True):
@@ -98,7 +99,7 @@ class Pix2PixModel(BaseModel):
         if train:
             self.fake_B = self.netG(self.real_A)
             for i, clss in enumerate(self.classes):
-                self.__dict__['fake_B_'+clss] = self.fake_B[:,i:i+self.opt.input_nc]  # G(A)
+                self.__dict__['fake_B_'+clss] = self.fake_B[:self.opt.input_nc, i:i+self.opt.input_nc]  # G(A)
         if not train:
             # self.fake_test_B = torch.repeat_interleave(self.netG(self.real_test_A[0][None,...]).detach(), self.real_test_A.shape[0]*0+1, axis=0)  # G(A)
             test = self.real_test_A[0][None, ...]
@@ -106,7 +107,7 @@ class Pix2PixModel(BaseModel):
             net = self.netG.module.to('cpu')
             self.fake_test_B = net(test)  # G(A)
             for i, clss in enumerate(self.classes):
-                self.__dict__['fake_test_B_'+clss] = self.fake_test_B[:,i:i+self.opt.input_nc]
+                self.__dict__['fake_test_B_'+clss] = self.fake_test_B[:self.opt.input_nc,i:i+self.opt.input_nc]
             self.netG.cuda()
 
     def backward_D(self):
