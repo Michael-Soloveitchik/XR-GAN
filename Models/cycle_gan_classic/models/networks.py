@@ -580,7 +580,7 @@ class UnetSkipConnectionBlock(nn.Module):
         if self.outermost:
             x_h = self.model(x)
             crop_dims = [(max(0,y_i-x_i)-(max(0,y_i-x_i)//2), y_i-max(0,y_i-x_i)//2) for x_i, y_i in zip(x.shape, x_h.shape)]
-            x_h_croped = x_h[crop_dims[0][0]:crop_dims[0][1],crop_dims[1][0]:crop_dims[1][1],crop_dims[2][0]:crop_dims[2][1],crop_dims[3][0]:crop_dims[3][1]]
+            x_h_croped = x_h[:,:,crop_dims[2][0]:crop_dims[2][1],crop_dims[3][0]:crop_dims[3][1]]
             pad_shape = np.concatenate([[max(0, (a - b) // 2), max(0, (a - b)) - (max(0, (a - b) // 2))] for a, b in
                                         zip(x.shape[-2:], x_h_croped.shape[-2:])])
             x_h_croped_padded = torch.nn.functional.pad(x_h_croped, tuple(pad_shape), mode='reflect')
@@ -588,10 +588,10 @@ class UnetSkipConnectionBlock(nn.Module):
         else:   # add skip connections
             x_h = self.model(x)
             crop_dims = [(max(0,y_i-x_i)-(max(0,y_i-x_i)//2), y_i-max(0,y_i-x_i)//2) for x_i, y_i in zip(x.shape, x_h.shape)]
-            x_h_croped = x_h[crop_dims[0][0]:crop_dims[0][1],crop_dims[1][0]:crop_dims[1][1],crop_dims[2][0]:crop_dims[2][1],crop_dims[3][0]:crop_dims[3][1]]
+            x_h_croped = x_h[:,:,crop_dims[2][0]:crop_dims[2][1],crop_dims[3][0]:crop_dims[3][1]]
             pad_shape = np.concatenate([[max(0, (a - b) // 2), max(0, (a - b)) - (max(0, (a - b) // 2))] for a, b in
                                         zip(x.shape[-2:], x_h_croped.shape[-2:])])
-            x_h_croped_padded = torch.nn.functional.pad(x_h_croped, tuple(pad_shape), mode='reflect')
+            x_h_croped_padded = torch.nn.functional.pad(x_h_croped, tuple(pad_shape[::-1]), mode='reflect')
             # print(x.shape,x_h.shape, x_h_croped_padded.shape)
             # print(crop_dims, tuple(pad_shape))
             return torch.cat([x, x_h_croped_padded], 1)
@@ -623,12 +623,14 @@ class NLayerDiscriminator(nn.Module):
         for n in range(1, n_layers):  # gradually increase the number of filters
             nf_mult_prev = nf_mult
             nf_mult = min(2 ** n, 8)
+            if fraction is None:
+                conv_layer = [nn.Conv2d(ndf * nf_mult_prev, ndf * nf_mult, kernel_size=kw, stride=2, padding=padw, bias=use_bias)]
+            else:
+                conv_layer = [FullyConvolutionalFractionalScaling2D(r=fraction[0], s=fraction[1],
+                                                      scaling_mode='nearest', is_inner_layer=True),
+                nn.Conv2d(ndf * nf_mult_prev, ndf * nf_mult, kernel_size=3, stride=1, padding=1, bias=use_bias)]
             sequence += [
-                nn.Conv2d(ndf * nf_mult_prev, ndf * nf_mult, kernel_size=kw, stride=2, padding=padw, bias=use_bias) \
-                if fraction is None else \
-                FullyConvolutionalFractionalScaling2D(r=fraction[0], s=fraction[1],
-                                                                      scaling_mode='nearest', is_inner_layer=True),
-                nn.Conv2d(ndf * nf_mult_prev, ndf * nf_mult, kernel_size=3, stride=1, padding=1, bias=use_bias),
+                *conv_layer,
                 norm_layer(ndf * nf_mult),
                 nn.LeakyReLU(0.2, True)
             ]

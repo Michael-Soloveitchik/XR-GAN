@@ -24,5 +24,5 @@ def train_models(configs, model_name):
     subprocess.call(cmd)
 if __name__ == '__main__':
     configs = SubXRParser()
-    train_models(configs, "XR_2_Ulana_and_Radius_Mask")
+    train_models(configs, "DRR_2_Mask")
 

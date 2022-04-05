@@ -45,7 +45,7 @@ class Pix2PixModel(BaseModel):
         BaseModel.__init__(self, opt)
         # specify the training losses you want to print out. The training/test scripts will call <BaseModel.get_current_losses>
         self.loss_names = ['G_GAN', 'G_L1', 'D_real', 'D_fake']
-        self.classes = opt.classes.split('_')
+        self.classes = opt.output_classes.split('_')
         # specify the images you want to save/display. The training/test scripts will call <BaseModel.get_current_visuals>
         self.visual_names_train = ['real_A'] + ['fake_B_'+clss for clss in self.classes] + ['real_B_'+clss for clss in self.classes]
         self.visual_names_test = ['real_test_A'] + ['fake_test_B_'+clss for clss in self.classes]
@@ -57,7 +57,8 @@ class Pix2PixModel(BaseModel):
         else:  # during test time, only load G
             self.model_names = ['G']
         # define networks (both generator and discriminator)
-        fraction = None if (opt.fraction_r<=0 or opt.fraction_s<=0) else (opt.fraction_r,opt.fraction_s)
+
+        fraction = None if (opt.fraction_r <= 0 or opt.fraction_s <= 0) else (opt.fraction_r, opt.fraction_s)
         self.netG = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.netG, opt.norm,
                                       not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids, fraction=fraction)
 
@@ -87,6 +88,8 @@ class Pix2PixModel(BaseModel):
         self.real_A = input['A' if AtoB else 'B'].to(self.device)
         self.real_test_A = input['test_A'].to(self.device).detach()[:2]
         self.real_B = input['B' if AtoB else 'A'].to(self.device)
+        for clss in self.classes:
+            self.__dict__['real_B_' + clss] = input['B_'+clss if AtoB else 'A_'+clss].to(self.device)
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
     def forward(self, train=True):
@@ -95,7 +98,7 @@ class Pix2PixModel(BaseModel):
         if train:
             self.fake_B = self.netG(self.real_A)
             for i, clss in enumerate(self.classes):
-                self.__dict__['fake_B_'+clss] = self.fake_B[:,i][:,None,...]  # G(A)
+                self.__dict__['fake_B_'+clss] = self.fake_B[:,i:i+self.opt.input_nc]  # G(A)
         if not train:
             # self.fake_test_B = torch.repeat_interleave(self.netG(self.real_test_A[0][None,...]).detach(), self.real_test_A.shape[0]*0+1, axis=0)  # G(A)
             test = self.real_test_A[0][None, ...]
@@ -103,23 +106,19 @@ class Pix2PixModel(BaseModel):
             net = self.netG.module.to('cpu')
             self.fake_test_B = net(test)  # G(A)
             for i, clss in enumerate(self.classes):
-                self.__dict__['fake_test_B_'+clss] = self.fake_test_B[:,i][:,None,...]
+                self.__dict__['fake_test_B_'+clss] = self.fake_test_B[:,i:i+self.opt.input_nc]
             self.netG.cuda()
 
     def backward_D(self):
         """Calculate GAN loss for the discriminator"""
         # Fake; stop backprop to the generator by detaching fake_B
-        self.loss_D_fake = 0
-        for i, clss in enumerate(self.classes):
-            fake_AB = torch.cat((self.real_A, self.fake_B[:,i][:,None,...]), 1)  # we use conditional GANs; we need to feed both input and output to the discriminator
-            pred_fake = self.netD(fake_AB.detach())
-            self.loss_D_fake += self.criterionGAN(pred_fake, False)
+        fake_AB = torch.cat((self.real_A, self.fake_B ), 1)# we use conditional GANs; we need to feed both input and output to the discriminator
+        pred_fake = self.netD(fake_AB.detach())
+        self.loss_D_fake = self.criterionGAN(pred_fake, False)
         # Real
-        self.loss_D_real = 0
-        for i, clss in enumerate(self.classes):
-            real_AB = torch.cat((self.real_A, self.real_B[:,i][:,None,...]), 1)
-            pred_real = self.netD(real_AB)
-            self.loss_D_real += self.criterionGAN(pred_real, True)
+        real_AB = torch.cat((self.real_A, self.real_B), 1)
+        pred_real = self.netD(real_AB)
+        self.loss_D_real = self.criterionGAN(pred_real, True)
         # combine loss and calculate gradients
         self.loss_D = (self.loss_D_fake + self.loss_D_real) * 0.5
         self.loss_D.backward()
@@ -127,15 +126,12 @@ class Pix2PixModel(BaseModel):
     def backward_G(self):
         """Calculate GAN and L1 loss for the generator"""
         # First, G(A) should fake the discriminator
-        self.loss_G_GAN = 0
-        for i, clss in enumerate(self.classes):
-            fake_AB = torch.cat((self.real_A, self.fake_B[:,i][:,None,...]), 1)
-            pred_fake = self.netD(fake_AB)
-            self.loss_G_GAN += self.criterionGAN(pred_fake, True)
+        # for i, clss in enumerate(self.classes):
+        fake_AB = torch.cat((self.real_A, self.fake_B), 1)
+        pred_fake = self.netD(fake_AB)
+        self.loss_G_GAN = self.criterionGAN(pred_fake, True)
         # Second, G(A) = B
-        self.loss_G_L1 = 0
-        for i, clss in enumerate(self.classes):
-            self.loss_G_L1 += self.criterionL1(self.fake_B[:,i][:,None,...], self.real_B[:,i][:,None,...]) * self.opt.lambda_L1
+        self.loss_G_L1 = self.criterionL1(self.fake_B , self.real_B) * self.opt.lambda_L1
         # combine loss and calculate gradients
         self.loss_G = self.loss_G_GAN + self.loss_G_L1
         self.loss_G.backward()
