@@ -89,7 +89,9 @@ def create_datasets(configs, dataset_type):
                             os.path.join(configs['Datasets'][dataset_type]['in_dir_' + mode + '_B'][i_B],
                                          im_B_name))
                         im_B_raw_transformed = transform_B(im_B_raw, im_name=im_B_name)
-
+                        random.seed(seed);
+                        np.random.seed(seed);
+                        imgaug.random.seed(seed)
                         im_B_raw_transformed_augmented = augmentation(im_B_raw_transformed)
 
                         cv2.imwrite(os.path.abspath(os.path.join(configs['Datasets'][dataset_type]['out_dir'], mode, 'B', dir_B, str(idx_im_name)+'.jpg')), im_B_raw_transformed_augmented)

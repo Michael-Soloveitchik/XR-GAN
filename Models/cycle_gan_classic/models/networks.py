@@ -583,7 +583,7 @@ class UnetSkipConnectionBlock(nn.Module):
             x_h_croped = x_h[:,:,crop_dims[2][0]:crop_dims[2][1],crop_dims[3][0]:crop_dims[3][1]]
             pad_shape = np.concatenate([[max(0, (a - b) // 2), max(0, (a - b)) - (max(0, (a - b) // 2))] for a, b in
                                         zip(x.shape[-2:], x_h_croped.shape[-2:])])
-            x_h_croped_padded = torch.nn.functional.pad(x_h_croped, tuple(pad_shape), mode='reflect')
+            x_h_croped_padded = torch.nn.functional.pad(x_h_croped, tuple(pad_shape[::-1]), mode='reflect')
             return x_h_croped_padded
         else:   # add skip connections
             x_h = self.model(x)
