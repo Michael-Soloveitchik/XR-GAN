@@ -34,7 +34,7 @@
     "Datasets" : {
         "XR_complete_2_Mask_complete" :   {
             "model": "cycle_gan",
-            "out_dir" : "./Datasets/drr_complete_2_mask_complete",
+            "out_dir" : "./Datasets/drr_complete_2_mask_complete_600",
             "in_out_sub_dirs_train_A" : [
                                          ["./Data/DRR_complete/Hand", "Hand"]
                                         ],
@@ -59,8 +59,8 @@
                                     "image_2_mask": [0.2,1.0]
                                 }
                             ],
-             "repeat_times_train" : 50,
-             "repeat_times_test" : 2,
+             "repeat_times_train" : 1,
+             "repeat_times_test" : 1,
              "is_paired": true,
              "augmentation_train_A": "XR_2_mask_AU",
              "augmentation_train_B": "XR_2_mask_AU",

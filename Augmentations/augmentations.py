@@ -14,8 +14,8 @@ XR_2_mask_AU = A.Compose([
     A.RandomCrop(900, 900, p=1.0),
     # A.Sharpen(alpha=0.9,lightness=1.,p=0.2),
     A.augmentations.geometric.resize.RandomScale(scale_limit=0.3, interpolation=cv2.INTER_CUBIC, p=1.),
-    A.augmentations.transforms.PadIfNeeded(min_height=300, min_width=300),
-    A.CenterCrop(300, 300, p=1.0),
+    A.augmentations.transforms.PadIfNeeded(min_height=600, min_width=600),
+    A.CenterCrop(600, 600, p=1.0),
 
     # A.Emboss(),
     # A.RandomBrightnessContrast(),
