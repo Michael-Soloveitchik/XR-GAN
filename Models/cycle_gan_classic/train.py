@@ -61,8 +61,13 @@ if __name__ == '__main__':
             if not total_iters % opt.display_freq == 0:
                 model.real_A.detach()
                 model.real_B.detach()
+                model.fake_B.detach()
                 del model.real_A
                 del model.real_B
+                del model.fake_B
+                for clss in opt.output_classes.split('_'):
+                    del model.__dict__['fake_B_'+clss]
+                    del model.__dict__['real_B_'+clss]
             else:# display images on visdom and save images to a HTML file
                 save_result = total_iters % opt.update_html_freq == 0
                 model.forward(train=False)
@@ -71,9 +76,16 @@ if __name__ == '__main__':
                 model.real_test_A.detach()
                 model.real_A.detach()
                 model.real_B.detach()
+                model.fake_B.detach()
                 del model.real_test_A
                 del model.real_A
                 del model.real_B
+                del model.fake_B
+                for clss in opt.output_classes.split('_'):
+                    model.__dict__['fake_B_'+clss].detach()
+                    model.__dict__['real_B_'+clss].detach()
+                    del model.__dict__['fake_B_'+clss]
+                    del model.__dict__['real_B_'+clss]
                 torch.cuda.empty_cache()
             for k in list(data.keys()):
                 try:

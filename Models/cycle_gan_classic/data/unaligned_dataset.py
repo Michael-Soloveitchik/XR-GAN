@@ -33,7 +33,7 @@ class UnalignedDataset(BaseDataset):
         self.B_paths = {clss: sorted(make_dataset(os.path.join(self.dir_B,clss+'_Mask'), opt.max_dataset_size)) for clss in opt.output_classes.split('_')}    # load images from '/path/to/data/trainB'
         self.A_size = len(self.A_paths)  # get the size of dataset A
         self.test_A_size = len(self.test_A_paths)  # get the size of dataset A
-        self.B_size = len(self.B_paths)  # get the size of dataset B
+        self.B_size = min([len(self.B_paths[clss]) for clss in opt.output_classes.split('_')])  # get the size of dataset B
         btoA = self.opt.direction == 'BtoA'
         input_nc = self.opt.output_nc if btoA else self.opt.input_nc       # get the number of channels of input image
         output_nc = self.opt.input_nc if btoA else self.opt.output_nc      # get the number of channels of output image
