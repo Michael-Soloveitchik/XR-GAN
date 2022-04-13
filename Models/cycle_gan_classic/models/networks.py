@@ -6,6 +6,7 @@ import torch.nn as nn
 from torch.nn import init
 import functools
 from torch.optim import lr_scheduler
+sys.path.append(r'C:\Users\Michael Soloveitchik\PycharmProjects\XR-GAN')
 sys.path.append(r'/home/michael/PycharmProjects/XR-GAN')
 from Models.Layers.fully_convolutional_fractional_scale_layer import FullyConvolutionalFractionalScaling2D
 

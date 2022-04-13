@@ -61,8 +61,13 @@ def create_datasets(configs, dataset_type):
             augmentation = parse_augmentation(configs['Datasets'][dataset_type]['augmentation_'+mode+'_'+side])
             in_out_sub_dirs_content = [a for a in match_A_2_B_files(configs['Datasets'][dataset_type]['in_out_sub_dirs_'+mode+'_A'], configs['Datasets'][dataset_type]['in_out_sub_dirs_'+mode+'_B'], False)]
             for i in tqdm(numba.prange(len(in_out_sub_dirs_content))):
+                if i>10:
+                    break
                 in_out_sub_dirs_A, in_out_sub_dirs_B = in_out_sub_dirs_content[i]
-                in_im_A_name = in_out_sub_dirs_A[0][0].decode("utf-8")
+                try:
+                    in_im_A_name = in_out_sub_dirs_A[0][0]
+                except:
+                    in_im_A_name = in_out_sub_dirs_A[0][0].decode("utf-8")
                 dir_A = in_out_sub_dirs_A[1][0]
                 in_im_A_raw = cv2.imread(os.path.join(configs['Datasets'][dataset_type]['in_out_sub_dirs_' + mode + '_A'][0][0], in_im_A_name))
                 im_A_raw_transformed = transform_A(in_im_A_raw, im_name=in_im_A_name)
@@ -85,7 +90,10 @@ def create_datasets(configs, dataset_type):
                     for i_B, (in_im_B_name, out_dir_B) in enumerate(zip(in_im_B_names, out_B_dirs)):
                         create_if_not_exists(os.path.abspath(
                             os.path.join(configs['Datasets'][dataset_type]['out_dir'], mode, 'B', out_dir_B)))
-                        in_im_B_name = in_im_B_name.decode("utf-8")
+                        try:
+                            in_im_B_name = in_im_B_name
+                        except:
+                            in_im_B_name = in_im_B_name.decode("utf-8")
                         out_dir_B = out_dir_B
                         im_B_raw = cv2.imread(
                             os.path.join(configs['Datasets'][dataset_type]['in_out_sub_dirs_' + mode + '_B'][i_B][0],

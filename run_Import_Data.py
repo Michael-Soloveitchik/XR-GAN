@@ -17,21 +17,23 @@ def import_data(configs):
                     for dir in tqdm(dirs_content([configs['Data'][data_type][data_source]['in_dir']], random=False)):
                         if not os.path.isdir(os.path.join(configs['Data'][data_type][data_source]['in_dir'],dir[0])):
                             continue
-                        for im_path in tqdm(os.listdir(os.path.join(configs['Data'][data_type][data_source]['in_dir'],dir[0]))):
-                            im_in = cv2.imread(os.path.join(configs['Data'][data_type][data_source]['in_dir'],dir[0],im_path))
-                            if im_in is None:
-                                continue
-                            im_out = im_in[CROP:-CROP,CROP:-CROP]
-                            new_im_path = "xr_"+str(i).zfill(4)+".jpg"
-                            cv2.imwrite(os.path.join(configs['Data'][data_type][data_source]['out_dir'],new_im_path),im_out )
-                            # shutil.copy(os.path.join(configs['Data'][data_type][data_source]['in_dir'],dir,im_path), os.path.join(configs['Data'][data_type][data_source]['out_dir'],new_im_path))
-                            i += 1
+                        for out_dir in configs["Data"][data_type][data_source]['out_sub_folders']:
+                            for im_path in tqdm(os.listdir(os.path.join(configs['Data'][data_type][data_source]['in_dir'],dir[0]))):
+                                im_in = cv2.imread(os.path.join(configs['Data'][data_type][data_source]['in_dir'],dir[0],im_path))
+                                if im_in is None:
+                                    continue
+                                im_out = im_in[CROP:-CROP,CROP:-CROP]
+                                new_im_path = "xr_"+str(i).zfill(4)+".jpg"
+                                cv2.imwrite(os.path.join(configs['Data'][data_type][data_source]['out_dir'],out_dir, new_im_path),im_out )
+                                # shutil.copy(os.path.join(configs['Data'][data_type][data_source]['in_dir'],dir,im_path), os.path.join(configs['Data'][data_type][data_source]['out_dir'],new_im_path))
+                                i += 1
                 elif data_source == 'DRR':
                     pass
                     transform = parse_transforms(configs['Data'][data_type][data_source]['transform'],data_type)
 
                     for dir in tqdm(dirs_content([configs['Data'][data_type][data_source]['in_dir']],random=False)):
-                        if not os.path.isdir(os.path.join(configs['Data'][data_type][data_source]['in_dir'],dir[0])):
+                        if not ((os.path.isdir(os.path.join(configs['Data'][data_type][data_source]['in_dir'],dir[0]))) and \
+                               ('pre_DRR' in os.listdir(os.path.join(configs['Data'][data_type][data_source]['in_dir'],dir[0])))):
                             continue
                         for prefix in configs["Data"][data_type][data_source]['out_sub_folders']:
                             i = 0
@@ -43,6 +45,7 @@ def import_data(configs):
                                 else:
                                     prefix_files = sorted([f for f in os.listdir(pre_DRR_orientation_path) if f.startswith(prefix) and f.endswith('.png') and ('Mask' in f)])
                                 print(pre_DRR_orientation_path)
+                                remove_and_create(os.path.join(configs['Data'][data_type][data_source]['out_dir'], prefix))
                                 for im_name in tqdm(prefix_files):
                                     new_im_name = prefix+'_'+str(i).zfill(5)+".jpg"
                                     shutil.copy(os.path.join(pre_DRR_orientation_path, im_name),
