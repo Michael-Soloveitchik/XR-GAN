@@ -38,7 +38,7 @@ class UnalignedDataset(BaseDataset):
         input_nc = self.opt.output_nc if btoA else self.opt.input_nc       # get the number of channels of input image
         output_nc = self.opt.input_nc if btoA else self.opt.output_nc      # get the number of channels of output image
         self.transform_A = get_transform(self.opt, grayscale=(opt.input_nc==1))
-        self.transform_B = get_transform(self.opt, grayscale=(opt.input_nc==1))
+        self.transform_B = get_transform(self.opt, grayscale=(opt.input_nc==1), mask=True)
         get_clossest_power_size = lambda t: int('1'+''.join(['0']*len(bin(t)[2:])),2) if '1' in bin(t)[3:] else t
         # get_pad = lambda t : ((get_clossest_power_size(t)-t)//2, ((get_clossest_power_size(t)-t)-(get_clossest_power_size(t)-t)//2))
         self.transform_test_A = get_transform(self.opt, grayscale=(opt.input_nc==1)) #lambda x: np.transpose(np.pad((np.array(x.getdata())/(127.5)).astype(np.float32).reshape(x.size[1], x.size[0],3), (get_pad(x.size[1]), get_pad(x.size[0]), (0,0)), 'constant'), [2,0,1])-1. #get_transform(self.opt, grayscale=(input_nc == 1))

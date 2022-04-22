@@ -1,12 +1,18 @@
 {
+    "mount": {
+        "google_drive_prefix_path": "/mnt/g/My Drive",
+        "data_prefix_path": "/mnt/c/Users/Michael Soloveitchik/PycharmProjects",
+        "dataset_prefix_path": "/mnt/c/Users/Michael Soloveitchik/PycharmProjects",
+        "code_prefix_path": "/mnt/c/Users/Michael Soloveitchik/PycharmProjects"
+    },
     "Data"     : {
         "complete"   : {
             "DRR" : {
-                "in_dir"  : "G:\\My Drive\\CT-DRR\\Data\\final CT - Data",
+                "in_dir"  : "google_drive_prefix_path/CT-DRR/Data/final CT - Data",
                 "in_sub_folders": [
                     "Data"
                 ],
-                "out_dir" : ".\\Data\\DRR_complete",
+                "out_dir" : "data_prefix_path/XR-GAN/Data/DRR_complete",
                 "out_sub_folders": [
                     "Hand",
                     "Forehand_Mask",
@@ -19,9 +25,9 @@
                 "transform": []
             },
             "XR"  : {
-                "in_dir"  : "G:\\My Drive\\CT-DRR\\Data\\final X-Ray - Data",
+                "in_dir"  : "google_drive_prefix_path/CT-DRR/Data/final X-Ray - Data",
                 "in_sub_folders": [],
-                "out_dir" : ".\\Data\\XR_complete\\",
+                "out_dir" : "data_prefix_path/XR-GAN/Data/XR_complete/",
                 "out_sub_folders": [
                     "Hand"
                 ],
@@ -36,23 +42,24 @@
     "Datasets" : {
         "XR_complete_2_Mask_complete" :   {
             "model": "cycle_gan",
-            "out_dir" : ".\\Datasets\\drr_complete_2_mask_complete_600",
+            "in_dir" : "data_prefix_path/XR-GAN/Data",
+            "out_dir" : "dataset_prefix_path//Datasets/drr_complete_2_mask_complete_600_test",
             "in_out_sub_dirs_train_A" : [
-                                         [".\\Data\\DRR_complete\\Hand", "Hand"]
+                                         ["data_prefix_path/XR-GAN/Data/DRR_complete/Hand", "Hand"]
                                         ],
             "in_out_sub_dirs_train_B" : [
-                                [".\\Data\\DRR_complete\\Forehand_Mask", "Forehand_Mask"],
-                                [".\\Data\\DRR_complete\\Carpals_Mask", "Carpals_Mask"],
-                                [".\\Data\\DRR_complete\\Metacarpals_Mask", "Metacarpals_Mask"],
-                                [".\\Data\\DRR_complete\\ProximalPhalanges_Mask","ProximalPhalanges_Mask"],
-                                [".\\Data\\DRR_complete\\IntermediatePhalanges_Mask","IntermediatePhalanges_Mask"],
-                                [".\\Data\\DRR_complete\\DistalPhalanges_Mask","DistalPhalanges_Mask"]
+                                ["DRR_complete/Forehand_Mask", "Forehand_Mask"],
+                                ["DRR_complete/Carpals_Mask", "Carpals_Mask"],
+                                ["DRR_complete/Metacarpals_Mask", "Metacarpals_Mask"],
+                                ["DRR_complete/ProximalPhalanges_Mask","ProximalPhalanges_Mask"],
+                                ["DRR_complete/IntermediatePhalanges_Mask","IntermediatePhalanges_Mask"],
+                                ["DRR_complete/DistalPhalanges_Mask","DistalPhalanges_Mask"]
                                 ],
             "in_out_sub_dirs_test_A" : [
-                                [".\\Data\\XR_complete\\Hand","Hand"]
+                                ["XR_complete/Hand","Hand"]
                               ],
             "in_out_sub_dirs_test_B" : [
-                                [".\\Data\\XR_complete\\Hand", "Hand"]
+                                ["XR_complete/Hand", "Hand"]
                               ],
              "transform_A": [
                              ],
@@ -61,7 +68,7 @@
                                     "image_2_mask": [0.2,1.0]
                                 }
                             ],
-             "repeat_times_train" : 1,
+             "repeat_times_train" : 10,
              "repeat_times_test" : 1,
              "is_paired": true,
              "augmentation_train_A": "XR_2_mask_AU",
@@ -71,11 +78,11 @@
         },
         "DRR_complete_2_XR_complete" :   {
             "model": "cycle_gan",
-            "in_dir_train_A" : ".\\Data\\DRR_complete\\Input",
-            "in_dir_train_B" : ".\\Data\\XR_complete\\XR",
-            "in_dir_test_A" : ".\\Data\\DRR_complete\\Input",
-            "in_dir_test_B" : ".\\Data\\XR_complete\\XR",
-            "out_dir" : ".\\Datasets\\xr_complete2ulna_and_radius_mask_complete",
+            "in_dir_train_A" : "./Data/DRR_complete/Input",
+            "in_dir_train_B" : "./Data/XR_complete/XR",
+            "in_dir_test_A" : "./Data/DRR_complete/Input",
+            "in_dir_test_B" : "./Data/XR_complete/XR",
+            "out_dir" : "./Datasets/xr_complete2ulna_and_radius_mask_complete",
             "out_sub_folders" : [
                 "A",
                 "B"
@@ -86,7 +93,7 @@
                                 {
                                     "intersect_with_mask": [
                                                             "cycle_gan_classic",
-                                                            "C:\\Users\\Michael Soloveitchik\\PycharmProjects\\XR-GAN\\SAMPLEs\\XR_2_Ulana_and_Radius_Mask",
+                                                            "code_prefix_path/XR-GAN/SAMPLEs/XR_2_Ulana_and_Radius_Mask",
                                                              10000
                                                            ]
                                 }
@@ -104,11 +111,11 @@
     "Models": {
         "DRR_2_Mask": {
             "parametrs": {
-                "python": "C:\\Users\\Michael Soloveitchik\\PycharmProjects\\XR-GAN\\Models\\cycle_gan_classic\\train.py",
+                "python": "code_prefix_path/XR-GAN/Models/cycle_gan_classic/train.py",
                 "batch_size": 2,
                 "serial_batches": null,
                 "dataset_mode": "unaligned",
-                "dataroot" : "C:\\Users\\Michael Soloveitchik\\PycharmProjects\\XR-GAN\\Datasets\\drr_complete_2_mask_complete",
+                "dataroot" : "dataset_prefix_path/XR-GAN/XR-GAN/Datasets/drr_complete_2_mask_complete",
                 "name": "DRR_2_Mask",
                 "model": "pix2pix",
                 "netG": "unet_128",

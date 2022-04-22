@@ -61,7 +61,7 @@ def create_datasets(configs, dataset_type):
             augmentation = parse_augmentation(configs['Datasets'][dataset_type]['augmentation_'+mode+'_'+side])
             in_out_sub_dirs_content = [a for a in match_A_2_B_files(configs['Datasets'][dataset_type]['in_out_sub_dirs_'+mode+'_A'], configs['Datasets'][dataset_type]['in_out_sub_dirs_'+mode+'_B'], False)]
             for i in tqdm(numba.prange(len(in_out_sub_dirs_content))):
-                if i>10:
+                if i>5:
                     break
                 in_out_sub_dirs_A, in_out_sub_dirs_B = in_out_sub_dirs_content[i]
                 try:

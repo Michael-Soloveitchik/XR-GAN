@@ -7,13 +7,14 @@ import random
 # import imgaug
 
 XR_2_mask_AU = A.Compose([
-    A.VerticalFlip(0.5),
-    A.HorizontalFlip(0.5),
-    A.ShiftScaleRotate(shift_limit=0.3,rotate_limit=360, p=1., border_mode=cv2.BORDER_CONSTANT,value=0),
+    # A.VerticalFlip(0.5),
+    # A.HorizontalFlip(0.5),
+    A.ShiftScaleRotate(shift_limit=0.3,rotate_limit=0., p=1., border_mode=cv2.BORDER_CONSTANT,value=0),
     A.augmentations.transforms.PadIfNeeded(min_height=900, min_width=900),
     A.RandomCrop(900, 900, p=1.0),
     # A.Sharpen(alpha=0.9,lightness=1.,p=0.2),
-    A.augmentations.geometric.resize.RandomScale(scale_limit=0.3, interpolation=cv2.INTER_CUBIC, p=1.),
+    A.augmentations.geometric.resize.RandomScale(scale_limit=0.25, interpolation=cv2.INTER_CUBIC, p=1.0),
+    A.augmentations.geometric.resize.LongestMaxSize(max_size=600, interpolation=cv2.INTER_CUBIC, p=1.),
     A.augmentations.transforms.PadIfNeeded(min_height=600, min_width=600),
     A.CenterCrop(600, 600, p=1.0),
 

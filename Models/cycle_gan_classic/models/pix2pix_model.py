@@ -1,4 +1,6 @@
 import torch
+
+from Models.Losses.losses import IoULoss, TverskyLoss, DiceLoss, FocalLoss
 from .base_model import BaseModel
 from . import networks
 
@@ -33,6 +35,7 @@ class Pix2PixModel(BaseModel):
         if is_train:
             parser.set_defaults(pool_size=0, gan_mode='vanilla')
             parser.add_argument('--lambda_L1', type=float, default=100.0, help='weight for L1 loss')
+            parser.add_argument('--lambda_BCE', type=float, default=10.0, help='weight for BCE loss')
 
         return parser
 
@@ -45,7 +48,8 @@ class Pix2PixModel(BaseModel):
         BaseModel.__init__(self, opt)
         self.opt
         # specify the training losses you want to print out. The training/test scripts will call <BaseModel.get_current_losses>
-        self.loss_names = ['G_GAN', 'G_L1', 'G_cross_entropy', 'D_real', 'D_fake']
+        self.loss_names = ['G_GAN', 'G_L1', 'G_cross_entropy_mean', 'G_cross_entropy_sum', 'G_Tversky', 'G_Dice', 'G_Jacard','G_focal_Tversky', 'G_focal_loss',\
+                           'D_real', 'D_fake']
                           # ["G_L1_+"clss for clss in self.opt.output_classes]
         self.classes = opt.output_classes.split('_')
         # specify the images you want to save/display. The training/test scripts will call <BaseModel.get_current_visuals>
@@ -72,7 +76,12 @@ class Pix2PixModel(BaseModel):
             # define loss functions
             self.criterionGAN = networks.GANLoss(opt.gan_mode).to(self.device)
             self.criterionL1 = torch.nn.L1Loss()
-            self.criterion_CE = torch.nn.BCEWithLogitsLoss(reduction='mean')
+            self.criterion_SCE = torch.nn.BCEWithLogitsLoss(reduction='sum')
+            self.criterion_MCE = torch.nn.BCEWithLogitsLoss(reduction='mean')
+            self.criterion_Jacard = IoULoss()
+            self.criterion_Dice = DiceLoss()
+            self.criterion_Tversky = TverskyLoss()
+            self.criterion_focal_loss = FocalLoss()
             # initialize optimizers; schedulers will be automatically created by function <BaseModel.setup>.
             self.optimizer_G = torch.optim.Adam(self.netG.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
             self.optimizer_D = torch.optim.Adam(self.netD.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
@@ -101,7 +110,7 @@ class Pix2PixModel(BaseModel):
         if train:
             self.fake_B = self.netG(self.real_A)
             for i, clss in enumerate(self.classes):
-                self.__dict__['fake_B_'+clss] = self.fake_B[:self.opt.input_nc, i:i+self.opt.input_nc]  # G(A)
+                self.__dict__['fake_B_'+clss] = self.normalize_tensor(self.fake_B[:self.opt.input_nc, i:i+self.opt.input_nc])  # G(A)
         if not train:
             # self.fake_test_B = torch.repeat_interleave(self.netG(self.real_test_A[0][None,...]).detach(), self.real_test_A.shape[0]*0+1, axis=0)  # G(A)
             test = self.real_test_A[0][None, ...]
@@ -109,13 +118,13 @@ class Pix2PixModel(BaseModel):
             net = self.netG.module.to('cpu')
             self.fake_test_B = net(test)  # G(A)
             for i, clss in enumerate(self.classes):
-                self.__dict__['fake_test_B_'+clss] = self.fake_test_B[:self.opt.input_nc,i:i+self.opt.input_nc]
+                self.__dict__['fake_test_B_'+clss] = self.normalize_tensor(self.fake_test_B[:self.opt.input_nc,i:i+self.opt.input_nc])
             self.netG.cuda()
 
     def backward_D(self):
         """Calculate GAN loss for the discriminator"""
         # Fake; stop backprop to the generator by detaching fake_B
-        fake_AB = torch.cat((self.real_A, self.fake_B ), 1)# we use conditional GANs; we need to feed both input and output to the discriminator
+        fake_AB = torch.cat((self.real_A, self.normalize_tensor(self.fake_B) ), 1)# we use conditional GANs; we need to feed both input and output to the discriminator
         pred_fake = self.netD(fake_AB.detach())
         self.loss_D_fake = self.criterionGAN(pred_fake, False)
         # Real
@@ -125,25 +134,36 @@ class Pix2PixModel(BaseModel):
         # combine loss and calculate gradients
         self.loss_D = (self.loss_D_fake + self.loss_D_real) * 0.5
         self.loss_D.backward()
+
     def normalize_tensor(self,tensor):
-        return torch.cat((tensor, ((-1./6.)*tensor.sum(1)[:,None,...]).to(tensor.device)), 1)
+        return (torch.nn.functional.sigmoid(tensor)-0.5)*2.
+        # return torch.cat((tensor, ((-1./6.)*tensor.sum(1)[:,None,...]).to(tensor.device)), 1)
 
     def backward_G(self):
         """Calculate GAN and L1 loss for the generator"""
         # First, G(A) should fake the discriminator
         # for i, clss in enumerate(self.classes):
-        fake_AB = torch.cat((self.real_A, self.fake_B), 1)
+        fake_AB = torch.cat((self.real_A, self.normalize_tensor(self.fake_B)), 1)
         pred_fake = self.netD(fake_AB)
         self.loss_G_GAN = self.criterionGAN(pred_fake, True)
         # Second, G(A) = B
-        self.loss_G_L1 = self.criterionL1(self.fake_B , self.real_B) * self.opt.lambda_L1
-        # fake_B = self.normalize_tensor(self.fake_B) #torch.cat((self.fake_B, torch.ones((1, 1, 600, 600)).to(self.fake_B.device)), 1)
-        # real_B = self.normalize_tensor(self.real_B) #torch.cat((self.real_B, torch.ones((1, 1, 600, 600)).to(self.real_B.device)*), 1)
-        self.loss_G_cross_entropy = self.criterion_CE(self.real_B, self.fake_B)
-        # combine loss and calculate gradients
-        self.loss_G = self.loss_G_GAN +self.loss_G_cross_entropy #+ self.loss_G_L1
-        self.loss_G.backward()
+        self.loss_G_L1 = self.criterionL1(self.normalize_tensor(self.fake_B) , self.real_B) * self.opt.lambda_L1
+        # fake_B = self.self.normalize_tensor(self.fake_B) #torch.cat((self.fake_B, torch.ones((1, 1, 600, 600)).to(self.fake_B.device)), 1)
+        # real_B = self.self.normalize_tensor(self.real_B) #torch.cat((self.real_B, torch.ones((1, 1, 600, 600)).to(self.real_B.device)*), 1)
+        self.loss_G_cross_entropy_sum = self.criterion_SCE(self.fake_B, (self.real_B+1.0)/2.) /float(self.opt.batch_size)* self.opt.lambda_BCE
+        self.loss_G_cross_entropy_mean = self.criterion_MCE(self.fake_B, (self.real_B+1.0)/2.) /float(self.opt.batch_size)* self.opt.lambda_BCE
+        self.loss_G_Tversky = self.criterion_Tversky(self.fake_B, (self.real_B+1.0)/2.) /float(self.opt.batch_size)* self.opt.lambda_BCE
+        self.loss_G_focal_Tversky = self.loss_G_Tversky**1.25
+        self.loss_G_focal_loss = 0. #self.criterion_focal_loss(self.fake_B, (self.real_B+1.0)/2.) /float(self.opt.batch_size)* self.opt.lambda_BCE
+        self.loss_G_Jacard = self.criterion_Jacard(self.fake_B, (self.real_B+1.0)/2.) /float(self.opt.batch_size)* self.opt.lambda_BCE
+        self.loss_G_Dice = self.criterion_Dice(self.fake_B, (self.real_B+1.0)/2.) /float(self.opt.batch_size)* self.opt.lambda_BCE
 
+        # combine loss and calculate gradients
+        self.loss_G = self.loss_G_GAN +self.loss_G_focal_Tversky*1000# + self.loss_G_L1
+        self.loss_G.backward()
+    # def iou_bce(self,logits, target):
+    #
+    #     torch.nn.softmax(logits)
     def optimize_parameters(self):
         self.forward()                   # compute fake images: G(A)
         # update D

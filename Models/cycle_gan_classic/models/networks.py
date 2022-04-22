@@ -532,13 +532,13 @@ class UnetSkipConnectionBlock(nn.Module):
                                             kernel_size=3, stride=1,
                                             padding=1, bias=use_bias)
                 down = [downscale, downconv]
-                up = [uprelu, upscale, upconv, nn.Tanh()]
+                up = [uprelu, upscale, upconv]
             else:
                 upconv = nn.ConvTranspose2d(inner_nc * 2, outer_nc,
                                             kernel_size=4, stride=2,
                                             padding=1)
                 down = [downconv]
-                up = [uprelu, upconv, nn.Tanh()]
+                up = [uprelu, upconv]
             model = down + [submodule] + up
         elif innermost:
             if fraction is not None:
